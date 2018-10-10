@@ -1,0 +1,98 @@
+---
+title: "Terror"
+author: "Aaron Skipper"
+date: "10/7/2018"
+output: html_document
+---
+
+```{r basicfcn, include=F}
+# can add quietly=T option to the require() function
+loadPkg = function(x) { if (!require(x,character.only=T, quietly =T)) { install.packages(x,dep=T,repos="http://cran.us.r-project.org"); if(!require(x,character.only=T)) stop("Package not found") } }
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r base_lib, include=FALSE}
+loadPkg("dplyr")
+loadPkg("tidyr")
+loadPkg("tidyverse")
+loadPkg("ggplot2")
+loadPkg("Rmisc")  # CI function for confidence interval, single vector
+loadPkg("corrplot")
+loadPkg("car")
+#library(tidyverse)
+#library(car)
+```
+
+
+```{r setup0, include=T}
+ter <- data.frame(read.csv("globalterrorismdb_0718dist.csv"))
+#colnames(ter)
+```
+
+### DISCOVERY.  Many columns, may want to see if we can eliminate the ones that we dont have interest in, or we can keep.
+
+```{r ESDA, include=TRUE}
+#summary(ter)
+#str(ter)
+```
+
+
+
+
+
+
+
+### Number of Kills by Weapon Type- Slide 32
+
+```{r setup1, include=T}
+library(ggplot2)
+ggplot(data=ter) + geom_bar(stat="identity", mapping=aes(x=targtype1_txt,y=nkill, color = weaptype1_txt))
+```
+
+```{r setup2, include=T}
+ter_us <- filter(ter, country_txt == "United States")
+```
+
+###big spike noted for 9/11/01 colvolutes the data
+
+```{r setup22, include=T}
+t_us <- aggregate(nkill ~ iyear, ter_us, sum)
+ggplot(data=t_us) + geom_area(mapping = aes(x=iyear, y=nkill))
+# removing that year - 9/11 2001
+t_us1 <- t_us[-c(31), ]
+ggplot(data=t_us1) + geom_area(mapping = aes(x=iyear, y=nkill))
+```
+
+
+###notice that 1995 and 2017 have large spikes- may want to 
+### investigate further for those years
+
+
+
+### number of kills by year
+
+
+```{r setup4, include=TRUE}
+ggplot(data=ter) + geom_bar(stat="identity",mapping = aes(x=iyear, y=nkill))
+```
+
+
+
+
+
+
+
+### This is slide 31- Except for this, it's showing the line representing the # of attacks, and the bars showing the number of kills.
+
+
+### number of kills with the number of attacks, by year. 
+
+```{r setup5, include=TRUE}
+ter_attack<-aggregate(attacktype1 ~ iyear, ter, sum)
+ggplot(data=ter) + geom_bar(stat="identity",mapping = aes(x=iyear, y=nkill)) + geom_line(data=ter_attack, mapping=aes(x=iyear, y=attacktype1, colour="blue"))
+```
+### This is the reverse from the slide. Shows the number of attacks for the line, overlaying the bar graph of total kills.
